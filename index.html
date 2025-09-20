@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Memories</title>
+  <!-- Google Fonts for cursive aesthetic -->
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      /* Use a soft pink/blue gradient background similar to the image */
+      background: linear-gradient(120deg, #eec6e6 0%, #f9c6c3 40%, #fbeee6 70%, #b8c6e8 100%);
+      font-family: 'Quicksand', 'Segoe UI', sans-serif;
+      overflow-x: hidden;
+    }
+    .container {
+      width: 100vw;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      z-index: 1;
+    }
+    .title {
+      text-align: center;
+      margin: 60px 0 10px 0;
+      color: #a97b63;
+      font-size: 4rem;
+      font-family: 'Pacifico', cursive;
+      font-weight: 700;
+      letter-spacing: 2px;
+      z-index: 2;
+      position: relative;
+      text-shadow: 0 2px 12px #fff7, 0 1px 0 #bfa59a;
+    }
+    .memories-underline {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-top: -10px;
+      margin-bottom: 10px;
+      pointer-events: none;
+    }
+    .memories-underline svg {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+    .curved-decor {
+      position: absolute;
+      left: 0;
+      width: 100vw;
+      z-index: 2;
+      pointer-events: none;
+    }
+    .curved-decor.top {
+      top: 0;
+      transform: translateY(-30px);
+    }
+    .curved-decor.bottom {
+      bottom: 0;
+      transform: translateY(30px) scaleY(-1);
+    }
+    .subtitle {
+      text-align: center;
+      color: #bfa59a;
+      font-size: 1.7rem;
+      margin-bottom: 40px;
+      z-index: 2;
+      position: relative;
+      font-family: 'Pacifico', cursive;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-shadow: 0 1px 8px #fff7, 0 1px 0 #e6cfc7;
+    }
+    .gallery {
+      width: 90vw;
+      max-width: 1200px;
+      display: flex;
+      flex-direction: column;
+      gap: 120px;
+      align-items: center;
+      position: relative;
+      z-index: 2;
+    }
+    .row {
+      width: 100%;
+      display: flex;
+      justify-content: space-around;
+      align-items: flex-start;
+      position: relative;
+      min-height: 340px;
+    }
+    .horizontal-rope {
+      position: absolute;
+      left: 5%;
+      right: 5%;
+      top: 60px;
+      height: 18px;
+      z-index: 1;
+      pointer-events: none;
+    }
+    .photo-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      z-index: 2;
+      min-width: 180px;
+    }
+    .rope {
+      width: 3px;
+      height: 70px;
+      background: linear-gradient(to bottom, #a97b63 80%, #7a5c3e 100%);
+      margin-bottom: -10px;
+      z-index: 2;
+      border-radius: 2px;
+      position: relative;
+    }
+    .clip {
+      width: 28px;
+      height: 12px;
+      background: #a97b63;
+      border-radius: 4px 4px 8px 8px;
+      margin-bottom: -6px;
+      z-index: 3;
+      box-shadow: 0 2px 6px #0002;
+      position: relative;
+    }
+    .photo {
+      width: 180px;
+      height: 220px;
+      object-fit: cover;
+      border-radius: 12px;
+      box-shadow: 0 8px 32px #0003, 0 2px 8px #a97b6340;
+      background: #fff;
+      transform: rotate(var(--rot, 0deg));
+      transition: transform 0.2s;
+      margin-bottom: 8px;
+      border: 4px solid #fff;
+      z-index: 2;
+      position: relative;
+      cursor: pointer;
+    }
+    .photo:hover {
+      transform: scale(1.04) rotate(var(--rot, 0deg));
+      box-shadow: 0 16px 48px #0004, 0 4px 16px #a97b6340;
+    }
+    /* Petal styles */
+    .petal {
+      position: fixed;
+      top: -40px;
+      width: 24px;
+      height: 24px;
+      pointer-events: none;
+      z-index: 10;
+      opacity: 0.85;
+      will-change: transform;
+      filter: blur(0.2px);
+    }
+    .petal svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+    /* Improved locked message style */
+    #locked-msg {
+      display: none;
+      position: fixed;
+      left: 50%;
+      top: 18%;
+      transform: translate(-50%, 0);
+      background: rgba(255, 255, 255, 0.92);
+      color: #a97b63;
+      font-family: 'Pacifico', cursive;
+      font-size: 1.3rem;
+      font-weight: 400;
+      border-radius: 14px;
+      box-shadow: 0 4px 24px #0002;
+      padding: 10px 26px;
+      z-index: 9999;
+      pointer-events: none;
+      opacity: 0;
+      letter-spacing: 1px;
+      text-shadow: 0 2px 10px #fff7, 0 1px 0 #e6cfc7;
+      transition: opacity 0.7s cubic-bezier(.4,0,.2,1);
+      text-align: center;
+    }
+    #locked-msg.show {
+      display: block;
+      opacity: 1;
+      animation: fadeInOut 1.7s cubic-bezier(.4,0,.2,1);
+    }
+    @keyframes fadeInOut {
+      0% { opacity: 0; }
+      15% { opacity: 1; }
+      85% { opacity: 1; }
+      100% { opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="rope-canvas" width="1920" height="1080" style="position:absolute;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:1;"></canvas>
+  <!-- Add floating message element -->
+  <div id="locked-msg">
+    got no pics here 🙄<br>
+ how about you send one 😙
+  </div>
+  <div class="container">
+    <div class="title">
+      Memories
+      <div class="memories-underline">
+        <svg viewBox="0 0 320 32" width="220" height="22" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M10 22 Q80 32 160 18 Q240 4 310 22" stroke="#a97b63" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        </svg>
+      </div>
+    </div>
+    <div class="subtitle">Maganda 🥰 </div>
+    <div class="gallery">
+      <div class="row" id="row1">
+        <div class="photo-group" style="--rot:-5deg">
+          <div class="rope"></div>
+          <div class="clip"></div>
+          <img class="photo" src="a.jpg" alt="1">
+        </div>
+        <div class="photo-group" style="--rot:3deg">
+          <div class="rope"></div>
+          <div class="clip"></div>
+          <img class="photo" src="a1.jpg" alt="2">
+        </div>
+        <div class="photo-group" style="--rot:-2deg">
+          <div class="rope"></div>
+          <div class="clip"></div>
+          <img class="photo" src="ss.jpg" alt="3">
+        </div>
+        <div class="photo-group" style="--rot:4deg">
+          <div class="rope"></div>
+          <div class="clip"></div>
+          <img class="photo" src="c.jpg" alt="4">
+        </div>
+        <div class="photo-group" style="--rot:-4deg">
+          <div class="rope"></div>
+          <div class="clip"></div>
+          <img class="photo" src="a2.jpg" alt="5">
+        </div>
+      </div>
+      <div class="row" id="row2">
+        <div class="photo-group" style="--rot:2deg">
+          <div class="rope"></div>
+          <div class="clip"></div>
+          <img class="photo" src="a3.jpg" alt="6">
+        </div>
+        <div class="photo-group" style="--rot:-3deg">
+          <div class="rope"></div>
+          <div class="clip"></div>
+          <img class="photo" src="locked.png" alt="7">
+        </div>
+        <div class="photo-group" style="--rot:4deg">
+          <div class="rope"></div>
+          <div class="clip"></div>
+          <img class="photo" src="locked.png" alt="8">
+        </div>
+        <div class="photo-group" style="--rot:-2deg">
+          <div class="rope"></div>
+          <div class="clip"></div>
+          <img class="photo" src="locked.png" alt="9">
+        </div>
+        <div class="photo-group" style="--rot:3deg">
+          <div class="rope"></div>
+          <div class="clip"></div>
+          <img class="photo" src="locked.png" alt="10">
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Petal SVG template (hidden) -->
+  <template id="petal-template">
+    <svg viewBox="0 0 24 24">
+      <ellipse cx="12" cy="16" rx="7" ry="10" fill="#f7b6b0" />
+      <ellipse cx="12" cy="8" rx="4" ry="7" fill="#fbeee6" opacity="0.7"/>
+    </svg>
+  </template>
+  <script>
+    // Draw realistic dangling horizontal ropes
+    function drawRopes() {
+      const canvas = document.getElementById('rope-canvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      function drawDanglingRope(rowElem, yOffset) {
+        const groups = Array.from(rowElem.querySelectorAll('.photo-group'));
+        if (groups.length < 2) return;
+        // Get the top center of each rope
+        const points = groups.map(g => {
+          const rope = g.querySelector('.rope');
+          const rect = rope.getBoundingClientRect();
+          return [
+            rect.left + rect.width / 2 + window.scrollX,
+            rect.top + window.scrollY
+          ];
+        });
+        // Draw a smooth rope using a bezier curve through all points
+        ctx.save();
+        ctx.strokeStyle = '#a97b63';
+        ctx.lineWidth = 6;
+        ctx.lineCap = 'round';
+        ctx.shadowColor = '#a97b63';
+        ctx.shadowBlur = 6;
+        ctx.beginPath();
+        ctx.moveTo(points[0][0], points[0][1] + yOffset);
+        for (let i = 1; i < points.length; i++) {
+          const prev = points[i - 1];
+          const curr = points[i];
+          // Control points for a gentle sag
+          const cp1x = prev[0] + (curr[0] - prev[0]) / 2;
+          const cp1y = prev[1] + yOffset + 30 + Math.abs(curr[0] - prev[0]) * 0.02;
+          ctx.bezierCurveTo(
+            cp1x, cp1y,
+            cp1x, cp1y,
+            curr[0], curr[1] + yOffset
+          );
+        }
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      // Draw for each row
+      const row1 = document.getElementById('row1');
+      const row2 = document.getElementById('row2');
+      drawDanglingRope(row1, 0);
+      drawDanglingRope(row2, 0);
+    }
+
+    window.addEventListener('resize', drawRopes);
+    window.addEventListener('DOMContentLoaded', () => {
+      setTimeout(drawRopes, 200); // Wait for layout
+    });
+
+    // Redraw ropes after images load
+    document.querySelectorAll('.photo').forEach(img => {
+      img.addEventListener('load', () => setTimeout(drawRopes, 100));
+    });
+
+    // Petal falling animation
+    const PETAL_COLORS = ['#f7b6b0', '#fbeee6', '#f9c6c3', '#f7b6b0'];
+    function randomPetalSVG() {
+      const t = document.getElementById('petal-template');
+      const svg = t.content.firstElementChild.cloneNode(true);
+      // Randomize color
+      svg.children[0].setAttribute('fill', PETAL_COLORS[Math.floor(Math.random() * PETAL_COLORS.length)]);
+      svg.children[1].setAttribute('fill', '#fff');
+      svg.children[1].setAttribute('opacity', Math.random() * 0.5 + 0.3);
+      return svg;
+    }
+    function createPetal(x = null) {
+      const petal = document.createElement('div');
+      petal.className = 'petal';
+      // If x is provided, use it, else random
+      if (x !== null) {
+        petal.style.left = x + 'px';
+      } else {
+        petal.style.left = Math.random() * window.innerWidth + 'px';
+      }
+      petal.style.top = '-40px';
+      petal.style.opacity = (Math.random() * 0.4 + 0.6).toFixed(2);
+      petal.style.transform = `rotate(${Math.random() * 360}deg) scale(${Math.random() * 0.5 + 0.7})`;
+      petal.appendChild(randomPetalSVG());
+      document.body.appendChild(petal);
+
+      // Animation parameters
+      const duration = Math.random() * 4 + 6; // 6-10s
+      const xStart = x !== null ? x : Math.random() * window.innerWidth;
+      const xDrift = (Math.random() - 0.5) * 200;
+      const yEnd = window.innerHeight + 60;
+      const rotate = (Math.random() - 0.5) * 180;
+
+      let start = null;
+      function animate(ts) {
+        if (!start) start = ts;
+        const t = (ts - start) / 1000;
+        const progress = t / duration;
+        if (progress > 1) {
+          petal.remove();
+          return;
+        }
+        // Swaying motion
+        const sway = Math.sin(progress * Math.PI * 2 + xStart) * 30;
+        petal.style.transform = `translate(${xDrift * progress + sway}px, ${progress * yEnd}px) rotate(${rotate * progress}deg) scale(${petal._scale || 1})`;
+        petal.style.left = `${xStart}px`;
+        requestAnimationFrame(animate);
+      }
+      requestAnimationFrame(animate);
+    }
+    setInterval(() => {
+      if (Math.random() < 0.7) createPetal();
+    }, 400);
+
+    // Shower petals when a photo is clicked
+    document.querySelectorAll('.photo').forEach(img => {
+      img.addEventListener('click', function(e) {
+        // Get the image's center x position in viewport
+        const rect = img.getBoundingClientRect();
+        const imgCenterX = rect.left + rect.width / 2 + window.scrollX;
+        // Shower 18-28 petals from above the image
+        const count = Math.floor(Math.random() * 10) + 18;
+        for (let i = 0; i < count; i++) {
+          // Spread petals horizontally above the image
+          const spread = (Math.random() - 0.5) * rect.width * 1.2;
+          createPetal(imgCenterX + spread);
+        }
+      });
+    });
+
+    // Show locked message when clicking on locked photos with fade animation
+    document.querySelectorAll('.photo').forEach(img => {
+      img.addEventListener('click', function(e) {
+        if (img.src && img.src.includes('locked.png')) {
+          e.stopPropagation();
+          const msg = document.getElementById('locked-msg');
+          msg.classList.add('show');
+          clearTimeout(msg._timeout);
+          msg._timeout = setTimeout(() => {
+            msg.classList.remove('show');
+          }, 1700);
+        }
+      });
+    });
+  </script>
+</body>
+</html>
